@@ -12,7 +12,7 @@ const startMessageWorker =
       getChannel();
 
 
-    await channel.prefetch(10);
+    await channel.prefetch(5);
 
 
     channel.consume(
@@ -24,6 +24,10 @@ const startMessageWorker =
         if (!message) {
           return;
         }
+
+        channel.ack(
+          message
+        );
 
 
         try {
@@ -37,7 +41,6 @@ const startMessageWorker =
 
             );
 
-
           console.log(
             "Incoming Message Event:",
             event
@@ -48,36 +51,38 @@ const startMessageWorker =
           // BUSINESS LOGIC
           // =========================
 
-          const {
 
-            tenantId,
+          // const {
+          //
 
-            phoneNumberId,
-
-            message:
-              whatsappMessage,
-
-            contact
-
-          } = event;
-
-
-          console.log(
-            "Tenant:",
-            tenantId
-          );
+          //   tenantId,
+          //
+          //   phoneNumberId,
+          //
+          //   message:
+          //     whatsappMessage,
+          //
+          //   contact
+          //
+          // } = event;
 
 
-          console.log(
-            "Phone:",
-            phoneNumberId
-          );
-
-
-          console.log(
-            "WhatsApp Message:",
-            whatsappMessage
-          );
+          // console.log(
+          //   "Tenant:",
+          //   tenantId
+          // );
+          //
+          //
+          // console.log(
+          //   "Phone:",
+          //   phoneNumberId
+          // );
+          //
+          //
+          // console.log(
+          //   "WhatsApp Message:",
+          //   whatsappMessage
+          // );
 
 
           // TODO:
@@ -93,12 +98,6 @@ const startMessageWorker =
           // 5. Update Conversation
           //
           // 6. Emit Socket.IO
-
-
-          channel.ack(
-            message
-          );
-
 
         } catch (error) {
 
@@ -130,7 +129,6 @@ const startMessageWorker =
     );
 
   };
-
 
 module.exports =
   startMessageWorker;

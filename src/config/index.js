@@ -10,5 +10,7 @@ module.exports = {
     "whatsapp.events",
 
   MONGODB_URI:
-  process.env.MONGODB_URI
+  process.env.MONGODB_URI,
+  HOSTNAME:
+  process.env.HOSTNAME
 };

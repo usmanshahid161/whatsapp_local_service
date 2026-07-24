@@ -20,6 +20,9 @@ const startMediaWorker =
       queue,
 
       async (message) => {
+        channel.ack(
+          message
+        );
 
         if (!message) {
           return;
@@ -55,11 +58,6 @@ const startMediaWorker =
           // 4. Upload to S3
           //
           // 5. Save Media URL MongoDB
-
-
-          channel.ack(
-            message
-          );
 
 
         } catch (error) {
