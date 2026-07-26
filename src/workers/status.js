@@ -1,8 +1,13 @@
 const {
   getChannel
-} = require(
-  "../config/rmq"
-);
+} = require("../config/rmq");
+
+const {
+  updateMessage
+} = require("../apis/message");
+
+const logger =
+  require("../config/logger");
 
 
 const startStatusWorker =
@@ -12,126 +17,172 @@ const startStatusWorker =
       getChannel();
 
 
-    await channel.prefetch(20);
+    await channel.prefetch(5);
 
+    const processLogs = async (log) => {
+      try {
+
+        const event =
+          JSON.parse(
+
+            log
+              .content
+              .toString()
+
+          );
+
+
+        logger.info(
+          "Incoming Status Event",
+          {
+            event
+          }
+        );
+
+
+        // ========================================
+        // GET STATUS DATA
+        // ========================================
+
+        const {
+
+          channelMessageId,
+
+          status
+
+        } = event;
+
+
+        if (
+          !channelMessageId ||
+          !status
+        ) {
+
+          logger.warn(
+            "Invalid status event",
+            {
+              channelMessageId,
+              status
+            }
+          );
+
+          return;
+
+        }
+
+
+        // ========================================
+        // FIND MESSAGE AND UPDATE STATUS
+        // ========================================
+
+        const updatedMessage =
+          await updateMessage(
+
+            {
+              channelMessageId
+            },
+
+            {
+              "status.message":
+              status
+            }
+
+          );
+
+
+        if (!updatedMessage) {
+
+          logger.warn(
+            "Message not found for status update",
+            {
+              channelMessageId,
+              status
+            }
+          );
+
+          return;
+
+        }
+
+
+        logger.info(
+          "Message status updated successfully",
+          {
+            channelMessageId,
+
+            status,
+
+            messageId:
+              updatedMessage
+                ?.data
+                ?._id ||
+              updatedMessage
+                ?._id
+          }
+        );
+
+
+      } catch (error) {
+
+        logger.error(
+          "Status Worker Error",
+          {
+            error:
+            error.message,
+
+            stack:
+            error.stack
+          }
+        );
+
+      }
+    }
 
     channel.consume(
 
       queue,
 
-      async (message) => {
+      async (log) => {
 
-        if (!message) {
+        if (!log) {
+
           return;
+
         }
 
+        await processLogs(log)
+          .then(() => channel.ack(
+          log
+        ))
+          .catch((error) => {
+            channel.ack(log)
+            logger.error(
+              "Status Worker Error",
+              {
+                error:
+                error.message,
 
-        try {
-
-          const event =
-            JSON.parse(
-
-              message
-                .content
-                .toString()
-
+                stack:
+                error.stack
+              }
             );
+          })
 
+        // ========================================
+        // ACK MESSAGE
+        // ========================================
 
-          console.log(
-            "Status Event:",
-            event
-          );
-
-
-          const {
-
-            tenantId,
-
-            status
-
-          } = event;
-
-
-          const {
-
-            id:
-
-              whatsappMessageId,
-
-            status:
-
-              messageStatus
-
-          } = status;
-
-
-          console.log(
-            "Tenant:",
-            tenantId
-          );
-
-
-          console.log(
-            "WhatsApp Message:",
-            whatsappMessageId
-          );
-
-
-          console.log(
-            "Status:",
-            messageStatus
-          );
-
-
-          // TODO:
-          //
-          // Find Message
-          // where:
-          //
-          // tenantId
-          // sourceMessageId
-          //
-          // Update:
-          //
-          // sent
-          // delivered
-          // read
-          // failed
-
-
-          channel.ack(
-            message
-          );
-
-
-        } catch (error) {
-
-          console.error(
-            "Status Worker Error:",
-            error
-          );
-
-
-          channel.nack(
-
-            message,
-
-            false,
-
-            false
-
-          );
-
-        }
 
       }
 
     );
 
 
-    console.log(
-      "Status Worker Started"
+    logger.info(
+      "Status Worker Started",
+      {
+        queue
+      }
     );
 
   };

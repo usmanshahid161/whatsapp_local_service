@@ -12,8 +12,14 @@
   "license": "ISC",
   "dependencies": {
     "amqplib": "^2.0.1",
+    "axios": "^1.18.1",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "mongoose": "^9.8.0"
+    "got": "^15.1.0",
+    "mime-types": "^3.0.2",
+    "moment": "^2.30.1",
+    "mongoose": "^9.8.0",
+    "sdk-centrifuge": "^1.0.1",
+    "winston": "^3.19.0"
   }
 }

@@ -11,6 +11,16 @@ module.exports = {
 
   MONGODB_URI:
   process.env.MONGODB_URI,
+
+  INTERACTION_MANAGER:
+  process.env.INTERACTION_MANAGER,
+
   HOSTNAME:
-  process.env.HOSTNAME
+  process.env.HOSTNAME,
+
+  META_BASE_URL:
+  process.env.META_BASE_URL,
+
+  META_VERSION:
+  process.env.META_VERSION,
 };

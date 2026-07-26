@@ -5,6 +5,10 @@ const app = express();
 const config = require("./config");
 
 const {
+  getChannel
+} = require("./config/rmq");
+
+const {
   connectRabbitMQ
 } = require("./config/rmq");
 
@@ -24,6 +28,8 @@ const startMediaWorker =
 const startOutgoingWorker =
   require("./workers/outgoing");
 
+const createPubsub =
+  require("./pubsub");
 
 const messageQueue =
   config.HOSTNAME + "/message.queue";
@@ -48,6 +54,17 @@ const startApp = async () => {
 
     await connectRabbitMQ();
 
+    const channel = await getChannel();
+
+    const pubsub =
+      createPubsub(
+        channel,
+        mediaQueue,
+        "media.processing"
+      );
+
+    await pubsub.start();
+
 
     // =========================
     // CREATE QUEUES
@@ -60,7 +77,7 @@ const startApp = async () => {
 
     await setupQueues(
       mediaQueue,
-      "message.media"
+      "media.publish"
     );
 
     await setupQueues(

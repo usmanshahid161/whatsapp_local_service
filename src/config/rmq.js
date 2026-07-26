@@ -20,6 +20,8 @@ const connectRabbitMQ =
         .createChannel();
 
 
+
+
     await channel.assertExchange(
 
       config.RABBITMQ_EXCHANGE,
